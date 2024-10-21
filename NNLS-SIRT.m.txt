@@ -1,0 +1,66 @@
+
+function pp=nnlssirt(a,yy,elp,Kmax,minvalue)
+clc;
+clear;
+%this is the NNLS initialized SIRT algorithm to process the inelastic 
+%sacttering data
+%yy is the measured inelastic sacttering spectra
+%a is the matrix composed by the standard spectra for each element
+%elp is the iteration parameter or MSE
+%Kmax is the maxiamal iteration step 
+%minvalue is the minimal value to impose the non negative constrains
+[m,k]=size(yy);
+%always k=1
+[m,n]=size(a);
+% n is the number of elements
+%m is the count numbers 
+%%start the NNLS inversion using the code in Matlab
+p=lsqnonneg(a,yy);
+% p is the initial values obtained by NNLS
+dt=1;
+elp=0.00000000001£»
+%default elp 
+Kmax=10000;
+%default Kmax
+minvalue=0.001;
+%default minvalue for the relative yields
+%% Start the SIRT inversion 
+k=0;      
+while dt>elp&k<Kmax
+     jie=a*p';
+     dit=yy-jie; 
+     dt=sqrt(dit'*dit)/m;
+    for i=1:1:m
+        he(i)=0;
+        for j=1:1:n
+            he(i)=he(i)+a(i,j)^2;          
+        end
+    end
+    for j=1:1:n
+        sum(j)=0;
+        LA(j)=0;
+        for i=1:1:m
+            dtap(j,i)=a(i,j)*dit(i)/he(i);
+            sum(j)=sum(j)+dtap(j,i);
+            if a(i,j)>=0
+               LA(j)= LA(j)+1;
+            end
+        end
+    end
+    dp=sum./LA;
+    p=p+dp;
+    % imposing the non negative constrains 
+      for j=1:1:n
+        if p(j)<0
+           p(j)=minvalue;    %setting the nonnegative value
+        end
+    end 
+    k=k+1;
+end
+y=a*p'; % obtained the recorverd spectra after the inversion
+pp=p' %% The inverted relative yields by NNLS-SIRT
+
+
+
+
+
